@@ -1,4 +1,4 @@
-import os, json, random, string
+import os, json, random, string, shutil
 from datetime import datetime
 
 class DataFile:
@@ -42,7 +42,7 @@ class DataFile:
             .create() - создает файл и, при необходимости, создает папку
         """
 
-        file_path = f'{self.path}/{self.name}.{self.type}'
+        file_path = os.path.join(self.path, f'{self.name}.{self.type}')
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         if not os.path.exists(file_path):
@@ -50,12 +50,10 @@ class DataFile:
                 with open(file_path, 'w', encoding=self.encode) as f:
                     f.write("")
                 if self.logs: print(f'[DataFile - Create] {file_path} успешно создан.')
-            except:
-                if self.logs: print(f'[DataFile - Create] При создании файла {file_path} произошла ошибка.')
-                pass
+            except Exception as e:
+                if self.logs: print(f'[DataFile - Create] Ошибка при создании файла {file_path}: {e}')
         else:
             if self.logs: print(f'[DataFile - Create] Файл уже существует: {file_path}')
-            pass
 
     def read(self):
 
@@ -63,7 +61,7 @@ class DataFile:
             .read() - чтение файла (если файл - json, то автоматическое преобразование в словарь)
         """
 
-        file_path = f'{self.path}/{self.name}.{self.type}'
+        file_path = os.path.join(self.path, f'{self.name}.{self.type}')
         if os.path.exists(file_path):
             try:
                 with open(file_path, "r", encoding=self.encode) as f:
@@ -81,8 +79,8 @@ class DataFile:
             except Exception as e:
                 if self.logs: print(f'[DataFile - Read] Неизвестная ошибка при чтении файла {file_path}: {e}')
         else:
-            if self.logs: print(f'[DataFile - Read] Файл {self.path}/{self.name}.{self.type} не найден.')
-        return None
+            if self.logs: print(f'[DataFile - Read] Файл {file_path} не найден.')
+            return None
 
 
     def write(self, data):
@@ -91,7 +89,7 @@ class DataFile:
             .write(data) - запись данных в файл (если файл - json, то автоматическое переобразование в строчку)
         """
 
-        file_path = f'{self.path}/{self.name}.{self.type}'
+        file_path = os.path.join(self.path, f'{self.name}.{self.type}')
         if os.path.exists(file_path):
             try:
                 with open(file_path, "w", encoding=self.encode) as f:
@@ -114,7 +112,7 @@ class DataFile:
             .delete() - удаление файла
         """
         
-        file_path = f'{self.path}/{self.name}{f".{self.type}" if self.type != "" else ""}'
+        file_path = os.path.join(self.path, f'{self.name}.{self.type}') if self.type != "" else ""
         if os.path.exists(file_path):
             try:
                 if os.path.isfile(file_path):
@@ -131,15 +129,14 @@ class DataFile:
             .rename(new_name) - переименование файла
         """
 
-        old_file_path = f'{self.path}/{self.name}.{self.type}'
-        new_file_path = f'{self.path}/{new_name}.{self.type}'
+        old_file_path = os.path.join(self.path, f'{self.name}.{self.type}')
+        new_file_path = os.path.join(self.path, f'{new_name}.{self.type}')
         if os.path.exists(old_file_path):
             os.rename(old_file_path, new_file_path)
             if self.logs: print(f"[DataFile - Rename] Файл {self.name} успешно переименнован в {new_name}")
             self.name = new_name
         else:
             if self.logs: print(f'[DataFile - Rename] Файл {old_file_path} не найден.')
-            pass
 
     def info(self):
 
@@ -147,14 +144,13 @@ class DataFile:
             .info() - возвращает информацию о файле (родительская папка, путь, размер, название, дата последнего изменения)
         """
 
-        file_path = f'{self.path}/{self.name}.{self.type}'
+        file_path = os.path.join(self.path, f'{self.name}.{self.type}')
         if os.path.exists(file_path):
             file_info = os.stat(file_path)
             parent_folder = os.path.dirname(file_path)
             file_size = file_info.st_size
             last_modified = file_info.st_mtime
             last_modified_formatted = datetime.fromtimestamp(last_modified).strftime('%d.%m.%Y %H:%M:%S')
-
             info = {
                 "name": f'{self.name}.{self.type}',
                 "path": file_path,
@@ -207,18 +203,7 @@ class DataBaze:
         
         if os.path.exists(self.path):
             try:
-                for root, dirs, files in os.walk(self.path, topdown = False):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        os.remove(file_path)
-                        if self.logs:
-                            print(f"[DataFile - Delete] Файл {file_path} успешно удален.")
-                    for dir in dirs:
-                        dir_path = os.path.join(root, dir)
-                        os.rmdir(dir_path)
-                        if self.logs:
-                            print(f"[DataFile - Delete] Папка {dir_path} успешно удалена.")
-                os.rmdir(self.path)
+                shutil.rmtree(self.path)
                 if self.logs:
                     print(f"[DataFile - Delete] Папка {self.path} успешно удалена.")
             except Exception as e:
