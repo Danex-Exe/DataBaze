@@ -32,6 +32,16 @@
 
 # Use
 
-```
-from databaze import DataBaze, DataSync, DataFile
+```python
+from databaze import *
+
+db = DataBaze(path = 'data', logs = True)
+data_file = db.file(name = 'data', type = "json", encode = "utf-8")
+data_file.create() # if not created
+data = {
+        "users": ["User1", "User2"],
+        "admins": ["User1"]
+}
+data_file.write(data)
+print(data_file.read()['admins'])
 ```
