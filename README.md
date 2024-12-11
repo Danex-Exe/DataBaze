@@ -28,3 +28,10 @@
 
         .file(name, type, encode) - обьявляет файл
         .delete() - удаляет все файлы в базе данных
+
+
+# Use
+
+```
+from databaze import DataBaze, DataSync, DataFile
+```
