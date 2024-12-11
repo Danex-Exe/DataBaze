@@ -30,7 +30,7 @@
         .delete() - удаляет все файлы в базе данных
 
 
-# Use
+# Application
 
 ```python
 from databaze import *
