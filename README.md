@@ -23,7 +23,7 @@
 
  # DataBaze(path, logs)
 
-        path - путь до папки
+        path - путь до папки (default - .)
         logs - Показывать/Скрывать логи (default - False)
 
         .file(name, type, encode) - обьявляет файл
