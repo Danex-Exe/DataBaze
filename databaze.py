@@ -1,6 +1,6 @@
-import os, json, random, string, shutil
+import os, json, shutil
 from datetime import datetime
-
+        
 class DataFile:
 
     """
@@ -83,22 +83,33 @@ class DataFile:
             return None
 
 
-    def write(self, data):
+    def write(self, data, rewrite: bool = True):
 
         """
-            .write(data) - запись данных в файл (если файл - json, то автоматическое переобразование в строчку)
+            .write(data, type) - запись данных в файл (если файл - json, то автоматическое переобразование в строчку)
+            data - Данные
+            rewrite - Перезаписывать (True/False)
         """
 
         file_path = os.path.join(self.path, f'{self.name}.{self.type}')
         if os.path.exists(file_path):
             try:
-                with open(file_path, "w", encoding=self.encode) as f:
-                    if self.type == "json":
-                        f.write(json.dumps(data, ensure_ascii=False, indent=4))
-                        if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
-                    else:
-                        f.write(str(data))
-                        if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
+                if not rewrite:
+                    with open(file_path, "a", encoding=self.encode) as f:
+                        if self.type == "json":
+                            f.write(json.dumps(data, ensure_ascii=False, indent=4))
+                            if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
+                        else:
+                            f.write(str(data))
+                            if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
+                else:
+                    with open(file_path, "w", encoding=self.encode) as f:
+                        if self.type == "json":
+                            f.write(json.dumps(data, ensure_ascii=False, indent=4))
+                            if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
+                        else:
+                            f.write(str(data))
+                            if self.logs: print(f'[DataFile - Write] Данные успешно записаны в файл {file_path}')
             except TypeError as e:
                 if self.logs: print(f'[DataFile - Write] Ошибка при записи в файл {file_path}: {e}')
             except Exception as e:
