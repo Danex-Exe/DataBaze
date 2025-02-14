@@ -1,6 +1,6 @@
 # Usage
 
-# DataFile(name, type, encode, path, logs)
+## DataFile(name, type, encode, path, logs)
 
         name - Название файла
         type - Расширение файла (default - json)
@@ -15,7 +15,7 @@
         .rename(new_name) - переименование файла
         .info() - возвращает информацию о файле (родительская папка, путь, размер, название, дата последнего изменения)
 
- # DataBaze(path, logs)
+ ## DataBaze(path, logs)
 
         path - путь до папки (default - .)
         logs - Показывать/Скрывать логи (default - False)
