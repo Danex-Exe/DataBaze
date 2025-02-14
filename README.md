@@ -1,3 +1,5 @@
+# Usage
+
 # DataFile(name, type, encode, path, logs)
 
         name - Название файла
@@ -33,7 +35,7 @@
 # Application
 
 ```python
-from databaze import *
+from DataBaze import *
 
 db = DataBaze(path = 'data', logs = True)
 data_file = db.file(name = 'data', type = "json", encode = "utf-8")
