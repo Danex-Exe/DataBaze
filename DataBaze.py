@@ -1,5 +1,105 @@
 import os, json, shutil
 from datetime import datetime
+from fastapi import FastAPI, HTTPException, Request
+from typing import Any, Optional
+import os
+import json
+
+class DataAPIServer:
+    def __init__(self, db, file_name: str = 'config'):
+        self.db = db
+        self.file_name = file_name
+        self.app = FastAPI()
+        self.data_file = self.db.file(self.file_name, type='json', encode='utf-8')
+        self._setup_routes()
+
+    def _get_full_path(self):
+        return os.path.join(self.db.path, f"{self.file_name}.json")
+
+    def _ensure_file_exists(self):
+        if not os.path.exists(self._get_full_path()):
+            raise HTTPException(status_code=404, detail="File not found")
+
+    def _setup_routes(self):
+        @self.app.get("/{path:path}")
+        async def read_data(path: str):
+            self._ensure_file_exists()
+            data = self.data_file.read()
+            if not isinstance(data, dict):
+                raise HTTPException(status_code=500, detail="Invalid JSON data")
+            
+            path_parts = path.split('/') if path else []
+            current = data
+            for part in path_parts:
+                if isinstance(current, dict) and part in current:
+                    current = current[part]
+                else:
+                    raise HTTPException(status_code=404, detail=f"Key '{part}' not found")
+            return current
+
+        @self.app.post("/{path:path}")
+        async def update_data(path: str, request: Request):
+            self._ensure_file_exists()
+            data = self.data_file.read()
+            if not isinstance(data, dict):
+                raise HTTPException(status_code=500, detail="Invalid JSON data")
+            
+            path_parts = path.split('/') if path else []
+            if not path_parts:
+                raise HTTPException(status_code=400, detail="Cannot update root")
+            
+            key = path_parts[-1]
+            query_params = dict(request.query_params)
+            if key not in query_params:
+                raise HTTPException(status_code=400, detail=f"Missing parameter '{key}'")
+            value = query_params[key]
+            
+            current = data
+            for part in path_parts[:-1]:
+                if isinstance(current, dict) and part in current:
+                    current = current[part]
+                else:
+                    raise HTTPException(status_code=404, detail=f"Path part '{part}' not found")
+            
+            if not isinstance(current, dict):
+                raise HTTPException(status_code=400, detail="Parent is not a dictionary")
+            
+            current[key] = value
+            self.data_file.write(data)
+            return {"status": "success", "message": "Data updated"}
+
+        @self.app.delete("/{path:path}")
+        async def delete_data(path: str):
+            self._ensure_file_exists()
+            data = self.data_file.read()
+            if not isinstance(data, dict):
+                raise HTTPException(status_code=500, detail="Invalid JSON data")
+            
+            path_parts = path.split('/') if path else []
+            if not path_parts:
+                raise HTTPException(status_code=400, detail="Cannot delete root")
+            
+            key = path_parts[-1]
+            parent_parts = path_parts[:-1]
+            
+            current = data
+            for part in parent_parts:
+                if isinstance(current, dict) and part in current:
+                    current = current[part]
+                else:
+                    raise HTTPException(status_code=404, detail=f"Path part '{part}' not found")
+            
+            if not isinstance(current, dict) or key not in current:
+                raise HTTPException(status_code=404, detail=f"Key '{key}' not found")
+            
+            del current[key]
+            self.data_file.write(data)
+            return {"status": "success", "message": "Key deleted"}
+
+        @self.app.get("/")
+        async def read_root():
+            self._ensure_file_exists()
+            return self.data_file.read()
         
 class DataFile:
 
