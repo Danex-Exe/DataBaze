@@ -136,10 +136,11 @@ class DataFile:
         self.path = path
         self.logs = logs
 
-    def create(self):
+    def create(self, data = ""):
 
         """
-            .create() - создает файл и, при необходимости, создает папку
+            .create(data) - создает файл и, при необходимости, создает папку
+            data - Данные
         """
 
         file_path = os.path.join(self.path, f'{self.name}.{self.type}')
@@ -148,12 +149,15 @@ class DataFile:
         if not os.path.exists(file_path):
             try:
                 with open(file_path, 'w', encoding=self.encode) as f:
-                    f.write("")
+                    f.write(data)
                 if self.logs: print(f'[DataFile - Create] {file_path} успешно создан.')
+                return 'success'
             except Exception as e:
                 if self.logs: print(f'[DataFile - Create] Ошибка при создании файла {file_path}: {e}')
+                return 'error'
         else:
             if self.logs: print(f'[DataFile - Create] Файл уже существует: {file_path}')
+            return 'file_exists'
 
     def read(self):
 
