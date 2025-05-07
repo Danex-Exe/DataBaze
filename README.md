@@ -46,3 +46,32 @@ data = {
 data_file.write(data)
 print(data_file.read()['admins']) # ["User1"]
 ```
+
+
+```js
+const { DataBaze } = require('./dataModule');
+
+async function main() {
+    const db = new DataBaze('my-data');
+    const file = db.file('config');
+    
+    // Create file
+    await file.create({ version: 1.0 });
+    
+    // Чтение файла
+    const data = await file.read();
+    console.log(data);
+    
+    // Update data
+    await file.write({ ...data, updated: new Date() });
+    
+    // Getting file info
+    const info = await file.info();
+    console.log(info);
+    
+    // Delete DataBaze
+    await db.delete();
+}
+
+main();
+```
