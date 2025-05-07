@@ -49,7 +49,7 @@ print(data_file.read()['admins']) # ["User1"]
 
 
 ```js
-const { DataBaze } = require('./dataModule');
+const { DataBaze } = require('./DataBaze');
 
 async function main() {
     const db = new DataBaze('my-data');
