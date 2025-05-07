@@ -55,21 +55,21 @@ async function main() {
     const db = new DataBaze('my-data');
     const file = db.file('config');
     
-    // Create file
+    // Создание файла
     await file.create({ version: 1.0 });
     
     // Чтение файла
     const data = await file.read();
     console.log(data);
     
-    // Update data
+    // Обновление данных
     await file.write({ ...data, updated: new Date() });
     
-    // Getting file info
+    // Получение информации о файле
     const info = await file.info();
     console.log(info);
     
-    // Delete DataBaze
+    // Удаление базы данных
     await db.delete();
 }
 
